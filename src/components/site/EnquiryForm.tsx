@@ -52,6 +52,40 @@ export function EnquiryForm() {
           notes: form.notes.trim() || null,
         },
       });
+
+      // Email notification via Web3Forms
+      try {
+        const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        const message = `New enquiry received on your website!
+
+👤 Name: ${form.name}
+📱 Phone: ${form.phone}
+📧 Email: ${form.email}
+🚗 Service: ${form.service_type}
+📍 Pickup: ${form.pickup}
+📍 Drop: ${form.drop_location || "—"}
+📅 Travel Date: ${form.travel_date || "—"}${form.travel_time ? ` ${form.travel_time}` : ""}
+👥 Passengers: ${form.passengers || "—"}
+💬 Message: ${form.notes || "—"}
+⏰ Received at: ${timestamp}`;
+
+        await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: "9027a550-2226-4fde-9a02-6bc0285221a4",
+            subject: "🔔 New Enquiry - Atul Tour & Travels",
+            from_name: "Atul Tour & Travels Website",
+            email: form.email,
+            name: form.name,
+            message,
+            botcheck: "",
+          }),
+        });
+      } catch {
+        // non-blocking: enquiry already saved
+      }
+
       setDone(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send. Please try again or call us.");
